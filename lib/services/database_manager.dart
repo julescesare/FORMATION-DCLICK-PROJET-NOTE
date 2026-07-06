@@ -83,7 +83,7 @@ class DatabaseManager {
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
     } on DatabaseException catch (e) {
-      throw Exception("Impossible d'ajouter le rédacteur : ${e.toString()}");
+      throw Exception("Impossible d'ajouter l'utilisateur : ${e.toString()}");
     }
   }
 
@@ -101,6 +101,20 @@ class DatabaseManager {
       'utilisateurs',
       where: 'id = ?',
       whereArgs: [id],
+    );
+    if (result.isNotEmpty) {
+      return Utilisateur.fromMap(result.first);
+    }
+    return null;
+  }
+
+  // READ - Lire un utilisateur par email
+  Future<Utilisateur?> getUtilisateurByEmail(String email) async {
+    final db = await database;
+    final result = await db.query(
+      'utilisateurs',
+      where: 'email = ?',
+      whereArgs: [email],
     );
     if (result.isNotEmpty) {
       return Utilisateur.fromMap(result.first);
@@ -168,6 +182,18 @@ class DatabaseManager {
       return Note.fromMap(result.first);
     }
     return null;
+  }
+
+  // READ - Lire toutes les notes d'un utilisateur
+  Future<List<Note>> getNotesByUtilisateur(int utilisateurId) async {
+    final db = await database;
+    final result = await db.query(
+      'notes',
+      where: 'utilisateurId = ?',
+      whereArgs: [utilisateurId],
+      orderBy: 'dateCreation DESC',
+    );
+    return result.map((map) => Note.fromMap(map)).toList();
   }
 
   // UPDATE - Mettre à jour une note

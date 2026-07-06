@@ -1,22 +1,25 @@
 class Note {
   final int? id;
   final String titre;
-  final String Contenu;
+  final String contenu;
+  final int utilisateurId;
   final DateTime? dateCreation;
   final DateTime? dateModification;
 
   Note({
     this.id,
     required this.titre,
-    required this.Contenu,
+    required this.contenu,
+    required this.utilisateurId,
     this.dateCreation,
     this.dateModification,
   });
 
-  Note.sansId(String titre, String Contenu)
+  Note.sansId(String titre, String contenu, int utilisateurId)
       : id = null,
         titre = titre,
-        Contenu = Contenu,
+        contenu = contenu,
+        utilisateurId = utilisateurId,
         dateCreation = DateTime.now(),
         dateModification = DateTime.now();
 
@@ -25,7 +28,8 @@ class Note {
     return Note(
         id: map['id'] as int?,
         titre: map['titre'] as String,
-        Contenu: map['Contenu'] as String,
+        contenu: map['contenu'] as String,
+        utilisateurId: map['utilisateurId'] as int,
         dateCreation: map['dateCreation'] != null
             ? DateTime.parse(map['dateCreation'])
             : null,
@@ -38,15 +42,16 @@ class Note {
     return {
       'id': id,
       'titre': titre,
-      'Contenu': Contenu,
-      'dateCreation': dateCreation,
-      'dateModification': dateModification
+      'contenu': contenu,
+      'utilisateurId': utilisateurId,
+      'dateCreation': dateCreation?.toIso8601String(),
+      'dateModification': dateModification?.toIso8601String()
     };
   }
 
   @override
   String toString() {
     // TODO: implement toString
-    return 'Note(id: $id, titre: $titre, Contenu: $Contenu, dateCreation: $dateCreation, dateModification: $dateModification)';
+    return 'Note(id: $id, titre: $titre, contenu: $contenu, utilisateurId: $utilisateurId, dateCreation: $dateCreation, dateModification: $dateModification)';
   }
 }
