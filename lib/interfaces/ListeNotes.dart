@@ -40,6 +40,60 @@ class _ListeNotesInterfaceState extends State<ListeNotesInterface> {
     });
   }
 
+  bool _estTronque(String contenu) {
+    return contenu.length > 60;
+  }
+
+  void _afficherDetailsNote(Note note) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          note.titre,
+          style: const TextStyle(
+            color: AppColors.primaire,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                note.contenu,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Modifié le ${_formatDate(note.dateModification)}',
+                style: const TextStyle(
+                  color: AppColors.texteGris,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fermer'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _ouvrirFormulaire(note: note);
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.secondaire),
+            child: const Text('Modifier'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _supprimerNote(int id) async {
     final confirmation = await showDialog<bool>(
       context: context,
@@ -108,17 +162,17 @@ class _ListeNotesInterfaceState extends State<ListeNotesInterface> {
       appBar: AppBar(
         title: const Text(
           'Mes Notes',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.primaire,
         centerTitle: true,
-        leading: const Icon(Icons.menu_book_rounded, color: Colors.white),
+        leading:
+            const Icon(Icons.menu_book_rounded, color: Colors.white, size: 32),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {
-              // TODO: recherche de notes
-            },
+            icon: const Icon(Icons.search, color: Colors.white, size: 32),
+            onPressed: () {},
           ),
         ],
       ),
@@ -138,79 +192,103 @@ class _ListeNotesInterfaceState extends State<ListeNotesInterface> {
                     itemCount: _notes.length,
                     itemBuilder: (context, index) {
                       final note = _notes[index];
+                      final tronque = _estTronque(note.contenu);
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         elevation: 2,
+                        clipBehavior: Clip.antiAlias,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      note.titre,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primaire,
+                        child: InkWell(
+                          onTap:
+                              tronque ? () => _afficherDetailsNote(note) : null,
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        note.titre,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primaire,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit,
+                                              color: AppColors.secondaire,
+                                              size: 25),
+                                          onPressed: () =>
+                                              _ouvrirFormulaire(note: note),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete,
+                                              color: AppColors.erreur,
+                                              size: 25),
+                                          onPressed: () =>
+                                              _supprimerNote(note.id!),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _extrait(note.contenu),
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                if (tronque) ...[
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Voir plus',
+                                    style: TextStyle(
+                                      color: AppColors.secondaire,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit,
-                                            color: AppColors.secondaire,
-                                            size: 20),
-                                        onPressed: () =>
-                                            _ouvrirFormulaire(note: note),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: AppColors.erreur, size: 20),
-                                        onPressed: () =>
-                                            _supprimerNote(note.id!),
-                                      ),
-                                    ],
-                                  ),
                                 ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _extrait(note.contenu),
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 13,
+                                const SizedBox(height: 8),
+                                Text(
+                                  _formatDate(note.dateModification),
+                                  style: const TextStyle(
+                                    color: AppColors.texteGris,
+                                    fontSize: 11,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _formatDate(note.dateModification),
-                                style: const TextStyle(
-                                  color: AppColors.texteGris,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );
                     },
                   ),
                 ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.secondaire,
-        onPressed: () => _ouvrirFormulaire(),
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: SizedBox(
+        width: 64,
+        height: 64,
+        child: FloatingActionButton(
+          backgroundColor: AppColors.secondaire,
+          shape: const CircleBorder(),
+          onPressed: () => _ouvrirFormulaire(),
+          child: const Icon(Icons.add, color: Colors.white, size: 32),
+        ),
       ),
     );
   }

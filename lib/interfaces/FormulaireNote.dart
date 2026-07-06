@@ -63,6 +63,11 @@ class _FormulaireNoteInterfaceState extends State<FormulaireNoteInterface> {
     return null;
   }
 
+  void _viderChamps() {
+    _titreController.clear();
+    _contenuController.clear();
+  }
+
   Future<void> _enregistrerNote() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -134,12 +139,13 @@ class _FormulaireNoteInterfaceState extends State<FormulaireNoteInterface> {
         backgroundColor: AppColors.primaire,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
           onPressed: () => Navigator.of(context).pop(false),
         ),
         title: Text(
           _estModification ? 'Modifier la note' : 'Ajouter une note',
-          style: const TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -224,6 +230,30 @@ class _FormulaireNoteInterfaceState extends State<FormulaireNoteInterface> {
                         ),
                 ),
               ),
+              // Boutton Annuler
+              if (!_estModification) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _viderChamps,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.tertiaire,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Annuler',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ]
             ],
           ),
         ),
